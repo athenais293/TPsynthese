@@ -1,2 +1,4 @@
-## TP synthèse
-# Ensea in the Shell
+# TP synthèse
+## Ensea in the Shell
+
+Q1. Affichage d'un message d'accueil suivi d'un prompt simple
