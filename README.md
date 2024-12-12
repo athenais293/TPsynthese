@@ -18,15 +18,15 @@ The status must be retrieved in order to know whether the command ended normally
 ![Question 4](question 4.PNG)
 
 **Q5. Measurement of order execution time** 
-I create an executionTime function that calculates the execution time, and retrieve the time using the clock_gettime command.
+I create an executionTime function that calculates the execution time, and retrieve the time using the clock_gettime command.   
 ![Question 5](question 5.PNG)
 
 **Q6. Execution of a complex command**
-To handle more complex commands, we're going to use an array of caracter strings, so we need to replace the execlp command with execvp. The strtok function is used to split the command into an array of arguments, based on spaces. This makes it possible to handle complex commands with several arguments.
+To handle more complex commands, we're going to use an array of caracter strings, so we need to replace the execlp command with execvp. The strtok function is used to split the command into an array of arguments, based on spaces. This makes it possible to handle complex commands with several arguments.  
 ![Question 6](question 6.PNG)
 
 **Q7. "Management of redirections to stdin and stdout with ’<’ and ’>’**  
-I create a handleRedirection function, this function searches for redirections (< and >) in the command and opens the corresponding files. Using the O_WRONLY, O_CREAT, O_TRUNC and O_RDONLY functions.
+I create a handleRedirection function, this function searches for redirections (< and >) in the command and opens the corresponding files. Using the O_WRONLY, O_CREAT, O_TRUNC and O_RDONLY functions.  
 ![Question 7](question 7.PNG)
 
 ### CONCLUSION  
@@ -42,24 +42,19 @@ J'ai créé une fonction qui affiche un message et j'appelle cette fonction dans
 J'ai créé deux fonctions, l'une pour lire la commande saisie et l'autre pour exécuter cette commande. Et j'utilise ma fonction précédente displayMessage pour afficher l'invite. La fonction readCommand lit la commande saisie et supprime le dernier caractère correspondant au retour arrière. La fonction executeCommand crée un processus enfant avec la fonction fork, qui permet à l'interpréteur de commandes d'exécuter chaque commande dans un processus séparé, assurant ainsi son bon fonctionnement tout en isolant les erreurs et les signaux de commande. Ensuite, execlp exécute la commande.
 
 **Q3. Gestion de la sortie du shell avec la commande « exit »**  
-Je réutilise la fonction créée à la question 1. Notre code fonctionne :  
-![Microshell](microshell.PNG)
+Je réutilise la fonction créée à la question 1.  
 
 **Q4. Affichage du code de retour**  
-Le status doit être récupéré afin de savoir si la commande s'est terminée normalement ou a été stoppée par un signal, puis le prompt doit être stockée dans une variable et mis à jour après chaque exécution.
-![Question 4](question 4.PNG)
+Le status doit être récupéré afin de savoir si la commande s'est terminée normalement ou a été stoppée par un signal, puis le prompt doit être stockée dans une variable et mis à jour après chaque exécution.  
 
 **Q5. Mesure du temps d'exécution d'un ordre** 
-Je crée une fonction executionTime qui calcule le temps d'exécution, et je récupère le temps à l'aide de la commande clock_gettime.
-![Question 5](question 5.PNG)
+Je crée une fonction executionTime qui calcule le temps d'exécution, et je récupère le temps à l'aide de la commande clock_gettime.  
 
 **Q6. Exécution d'une commande complexe**
-Pour gérer des commandes plus complexes, nous allons utiliser un tableau de chaînes de caractères, et nous devons donc remplacer la commande execlp par execvp. La fonction strtok est utilisée pour découper la commande en un tableau d'arguments, basé sur les espaces. Cela permet de traiter des commandes complexes comportant plusieurs arguments.
-![Question 6](question 6.PNG)
+Pour gérer des commandes plus complexes, nous allons utiliser un tableau de chaînes de caractères, et nous devons donc remplacer la commande execlp par execvp. La fonction strtok est utilisée pour découper la commande en un tableau d'arguments, basé sur les espaces. Cela permet de traiter des commandes complexes comportant plusieurs arguments.  
 
 **Q7. « Gestion des redirections vers stdin et stdout avec '<' et '>'**.  
-Je crée une fonction handleRedirection, cette fonction recherche les redirections (< et >) dans la commande et ouvre les fichiers correspondants. En utilisant les fonctions O_WRONLY, O_CREAT, O_TRUNC et O_RDONLY.
-![Question 7](question 7.PNG)
+Je crée une fonction handleRedirection, cette fonction recherche les redirections (< et >) dans la commande et ouvre les fichiers correspondants. En utilisant les fonctions O_WRONLY, O_CREAT, O_TRUNC et O_RDONLY.  
 
 ### CONCLUSION  
 Ce projet m'a permis de maîtriser les concepts clés nécessaires à la création d'un shell interactif. J'ai appris à concevoir une boucle REPL pour lire, exécuter et afficher les résultats des commandes, tout en interagissant avec le système via des appels comme fork, execvp, et waitpid. La gestion des processus et des flux (stdin, stdout) m'a fait découvrir les descripteurs de fichiers, la redirection avec dup2 et la manipulation de chaînes de caractères avec strtok. J'ai également découvert comment mesurer le temps d'exécution avec clock_gettime et comment gérer les erreurs ou les signaux. Ce projet m'a fait passer d'utilisateur de ligne de commande à concepteur, en me donnant un aperçu du fonctionnement interne d'un shell.
