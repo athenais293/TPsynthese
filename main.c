@@ -33,9 +33,21 @@ int executionTime(struct timespec start_time, struct timespec end_time){
     return (int) ((seconds + nanoseconds * 1e-9) * 1000); 
 }
 
+void separateCommand(char *command, char *args[]) {
+    char *token = strtok(command, " ");  //to split the command when there is a space
+    int i = 0;
+
+    while (token != NULL) { //split until all arguments have been dealt
+        args[i] = token;
+        token = strtok(NULL, " "); 
+        i++;
+    }
+    args[i] = NULL; 
+}
+
 void executeCommand(char *command, char *dynamic_prompt) {
     struct timespec start_time, end_time;
-    pid_t pid=fork(); //creation ofa child process to deal with the command
+    pid_t pid=fork(); //creation of a child process to deal with the command
 
     clock_gettime(CLOCK_REALTIME, &start_time);
 
@@ -44,17 +56,9 @@ void executeCommand(char *command, char *dynamic_prompt) {
         //execlp(command,command,NULL);
 
         char *args[MAX_COMMAND_LENGTH];
-        char *token = strtok(command, " ");  //to split the command when there is a space
-        int i = 0;
+        separateCommand(command, args);
 
-        while (token != NULL) { //split until all arguments have been dealt
-            args[i] = token;
-            token = strtok(NULL, " "); 
-            i++;
-        }
-        args[i] = NULL; 
-
-        execvp(args[0], args);
+        execvp(args[0], args); 
         displayMessage(COMMAND_ERROR);
         exit(EXIT_FAILURE);;
     }
