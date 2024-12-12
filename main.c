@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <fcntl.h>
 
 #define MAX_COMMAND_LENGTH 128
 #define WELCOME_MESSAGE  "Bienvenue dans le Shell ENSEA.\nPour quitter, taper 'exit'.\n"
@@ -33,16 +34,39 @@ int executionTime(struct timespec start_time, struct timespec end_time){
     return (int) ((seconds + nanoseconds * 1e-9) * 1000); 
 }
 
-void separateCommand(char *command, char *args[]) {
+void separateCommand(char *command, char *argv[]) {
     char *token = strtok(command, " ");  //to split the command when there is a space
     int i = 0;
 
     while (token != NULL) { //split until all arguments have been dealt
-        args[i] = token;
+        argv[i] = token;
         token = strtok(NULL, " "); 
         i++;
     }
-    args[i] = NULL; 
+    argv[i] = NULL; 
+}
+
+void handleRedirection(char *command, int *in_fd, int *out_fd){
+    char *output_redirect = strchr(command, '>');
+    if (output_redirect !=NULL){
+        *output_redirect = '\0';
+        char *filename = strtok(output_redirect + 1, " ");
+        *out_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644); 
+        if (*out_fd == -1) {
+            perror("open");
+            exit(EXIT_FAILURE);
+        }
+    }
+    char *input_redirect = strchr(command, '<'); 
+    if (input_redirect != NULL) {
+        *input_redirect = '\0';  
+        char *filename = strtok(input_redirect + 1, " ");  
+        *in_fd = open(filename, O_RDONLY);  
+        if (*in_fd == -1) {
+            perror("open");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void executeCommand(char *command, char *dynamic_prompt) {
@@ -55,10 +79,25 @@ void executeCommand(char *command, char *dynamic_prompt) {
         //child process
         //execlp(command,command,NULL);
 
-        char *args[MAX_COMMAND_LENGTH];
-        separateCommand(command, args);
+        int in_fd = STDIN_FILENO;  
+        int out_fd = STDOUT_FILENO; 
 
-        execvp(args[0], args); 
+        handleRedirection(command, &in_fd, &out_fd);
+
+        if (in_fd != STDIN_FILENO) {
+            dup2(in_fd, STDIN_FILENO);  
+            close(in_fd);
+        }
+
+        if (out_fd != STDOUT_FILENO) {
+            dup2(out_fd, STDOUT_FILENO);  
+            close(out_fd);
+        }
+
+        char *argv[MAX_COMMAND_LENGTH];
+        separateCommand(command, argv);
+
+        execvp(argv[0], argv); 
         displayMessage(COMMAND_ERROR);
         exit(EXIT_FAILURE);;
     }
