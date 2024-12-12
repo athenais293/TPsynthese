@@ -41,7 +41,20 @@ void executeCommand(char *command, char *dynamic_prompt) {
 
     if (pid==0){ 
         //child process
-        execlp(command,command,NULL);
+        //execlp(command,command,NULL);
+
+        char *args[MAX_COMMAND_LENGTH];
+        char *token = strtok(command, " ");  //to split the command when there is a space
+        int i = 0;
+
+        while (token != NULL) { //split until all arguments have been dealt
+            args[i] = token;
+            token = strtok(NULL, " "); 
+            i++;
+        }
+        args[i] = NULL; 
+
+        execvp(args[0], args);
         displayMessage(COMMAND_ERROR);
         exit(EXIT_FAILURE);;
     }
