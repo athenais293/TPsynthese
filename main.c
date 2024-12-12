@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <time.h>
 
 #define MAX_COMMAND_LENGTH 128
 #define WELCOME_MESSAGE  "Bienvenue dans le Shell ENSEA.\nPour quitter, taper 'exit'.\n"
@@ -20,29 +21,43 @@ void readCommand(char *console_buffer, char *dynamic_prompt) {
     displayMessage(dynamic_prompt);
     ssize_t byte_read = read(STDIN_FILENO, console_buffer, MAX_COMMAND_LENGTH - 1);
     if (byte_read > 0) {
-        console_buffer[byte_read - 1] = '\0'; 
+        console_buffer[byte_read - 1] = '\0'; //Replaces the last character (carriage return) with a null character
     } else {
         console_buffer[0] = '\0'; 
     }
 }
 
-void executeCommand(char *command, char *dynamic_prompt) {
-    pid_t pid=fork();
+int executionTime(struct timespec start_time, struct timespec end_time){
+    long seconds = end_time.tv_sec - start_time.tv_sec;
+    long nanoseconds = end_time.tv_nsec - start_time.tv_nsec;
+    return (int) ((seconds + nanoseconds * 1e-9) * 1000); 
+}
 
-    if (pid==0){
+void executeCommand(char *command, char *dynamic_prompt) {
+    struct timespec start_time, end_time;
+    pid_t pid=fork(); //creation ofa child process to deal with the command
+
+    clock_gettime(CLOCK_REALTIME, &start_time);
+
+    if (pid==0){ 
+        //child process
         execlp(command,command,NULL);
         displayMessage(COMMAND_ERROR);
         exit(EXIT_FAILURE);;
     }
-    else if (pid > 0) 
+    else if (pid > 0) //parent process
     {
         int status;
-        waitpid(pid, &status, 0);
+        waitpid(pid, &status, 0);//has to wait for the child to finish
+
+        clock_gettime(CLOCK_REALTIME, &end_time);
+
+        int duration_ms = executionTime(start_time, end_time);
 
         if (WIFEXITED(status)) {
-            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [exit:%d] %% ", WEXITSTATUS(status));
+            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [exit:%d|%dms] %% ", WEXITSTATUS(status), duration_ms);
         } else if (WIFSIGNALED(status)) {
-            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [sign:%d] %% ", WTERMSIG(status));
+            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [sign:%d|%dms] %% ", WTERMSIG(status), duration_ms);
         }
         
     }
