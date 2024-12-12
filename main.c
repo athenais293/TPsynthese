@@ -16,9 +16,9 @@ void displayMessage(char *message){
     write(STDOUT_FILENO,message,strlen(message));
 }
 
-void readCommand(char *console_buffer) {
-    dispalyMessage(PROMPT);
-    int byte_read = read(STDIN_FILENO, console_buffer, MAX_COMMAND_LENGTH - 1);
+void readCommand(char *console_buffer, char *dynamic_prompt) {
+    displayMessage(dynamic_prompt);
+    ssize_t byte_read = read(STDIN_FILENO, console_buffer, MAX_COMMAND_LENGTH - 1);
     if (byte_read > 0) {
         console_buffer[byte_read - 1] = '\0'; 
     } else {
@@ -26,7 +26,7 @@ void readCommand(char *console_buffer) {
     }
 }
 
-void executeCommand(char *command){
+void executeCommand(char *command, char *dynamic_prompt) {
     pid_t pid=fork();
 
     if (pid==0){
@@ -36,7 +36,15 @@ void executeCommand(char *command){
     }
     else if (pid > 0) 
     {
-        wait(NULL);
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status)) {
+            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [exit:%d] %% ", WEXITSTATUS(status));
+        } else if (WIFSIGNALED(status)) {
+            snprintf(dynamic_prompt, MAX_COMMAND_LENGTH, "enseash [sign:%d] %% ", WTERMSIG(status));
+        }
+        
     }
     else {
         displayMessage(PROCESS_ERROR);
@@ -45,10 +53,11 @@ void executeCommand(char *command){
 
 int main() {
     char console_buffer[MAX_COMMAND_LENGTH];
+    char dynamic_prompt[MAX_COMMAND_LENGTH] = PROMPT;
     displayMessage(WELCOME_MESSAGE);
 
     while (1) {
-        readCommand(console_buffer);
+        readCommand(console_buffer, dynamic_prompt);
 
         if (strcmp(console_buffer, EXIT) == 0) {
             displayMessage(GOODBYE);
@@ -56,7 +65,7 @@ int main() {
         }
 
         if (strlen(console_buffer) > 0) {
-            executeCommand(console_buffer);
+            executeCommand(console_buffer, dynamic_prompt);
         }
     }
 
