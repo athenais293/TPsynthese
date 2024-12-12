@@ -17,7 +17,7 @@ void displayMessage(char *message){
 }
 
 void readCommand(char *console_buffer) {
-    write(STDOUT_FILENO, PROMPT, strlen(PROMPT));
+    dispalyMessage(PROMPT);
     int byte_read = read(STDIN_FILENO, console_buffer, MAX_COMMAND_LENGTH - 1);
     if (byte_read > 0) {
         console_buffer[byte_read - 1] = '\0'; 
